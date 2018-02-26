@@ -1,0 +1,54 @@
+-- This file has been generated from package.yaml by hpack version 0.27.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 97bd710e0bfb229eabbd6a7b22f44b8a9f2b317a22e1fcf9f86292b334a63e6a
+
+name:           Libil
+version:        0.1.0.0
+description:    Please see the README on Github at <https://github.com/ibnuda/Libil#readme>
+homepage:       https://github.com/ibnuda/Libil#readme
+bug-reports:    https://github.com/ibnuda/Libil/issues
+author:         Ibnu D. Aji
+maintainer:     ibnudaruaji@outlook.co.id
+copyright:      2018 Ibnu D. Aji
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+
+extra-source-files:
+    ChangeLog.md
+    README.md
+
+source-repository head
+  type: git
+  location: https://github.com/ibnuda/Libil
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_Libil
+  hs-source-dirs:
+      src
+  build-depends:
+      attoparsec
+    , base >=4.7 && <5
+    , text
+  default-language: Haskell2010
+
+test-suite Libil-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_Libil
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      Libil
+    , attoparsec
+    , base >=4.7 && <5
+    , text
+  default-language: Haskell2010
