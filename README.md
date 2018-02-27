@@ -5,8 +5,13 @@ Libil is a library for [Basa Walikan Jogja](http://jengjeng.mathripe.com/2007/06
 This implementation based on [Libil for Ruby](https://github.com/libil/libil).
 
 ## Installation
-To Be Added.
 
-## Planned Features
+If you use `stack`, you can add this repo in your `stack.yaml` at
 
-- Malang walikan.
+```
+packages:
+- location:
+    git: https://github.com/ibnuda/Libil.git
+    commit: whateverhashitmighthave.
+```
+
