@@ -1,54 +1,66 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lib where
 
-import           Prelude                    hiding (take, takeWhile)
-
-import           Data.Attoparsec.Combinator
-import           Data.Attoparsec.Text
-import qualified Data.Map.Strict            as Map
-import           Data.Maybe                 (fromJust)
-import qualified Data.Text                  as Text
+import           Data.List
+import qualified Data.Map.Strict as Map
+import           Data.Maybe      (fromJust)
+import           Data.String
 
 -- | First part of javanese script.
 -- https://en.wikipedia.org/wiki/Hanacaraka
-consonants1 :: [Text.Text]
-consonants1 = [ "h", "n", "c", "r", "k"
-              , "d", "t", "s", "w", "l"
-              ]
+consonants1 :: [String]
+consonants1 = ["h", "n", "c", "r", "k", "d", "t", "s", "w", "l"]
 
 -- | Second part of the consonants.
-consonants2 :: [Text.Text]
-consonants2 = [ "p", "dh", "j", "y", "ny"
-              , "m", "g", "b", "th", "ng"
-              ]
+consonants2 :: [String]
+consonants2 = ["p", "dh", "j", "y", "ny", "m", "g", "b", "th", "ng"]
 
 -- | Pairs of consonants for the rules.
-pairsOfConsonants :: Map.Map Text.Text Text.Text
+pairsOfConsonants :: Map.Map String String
 pairsOfConsonants =
   Map.fromList $ zip consonants1 consonants2 ++ zip consonants2 consonants1
 
--- | Vowels "a", "i", "u", "e", and "o".
-vowels :: [Char]
-vowels = ['a', 'o', 'e', 'i', 'u']
+-- | Vowels "a", "o", "e", "u", and "i".
+vowels :: String
+vowels = "aoeui"
 
--- | When a word starts with a vowel, we should append a 'h' letter in front of it.
-normalizeWords a =
-  case Text.unpack a of
-    x:xs
-      | inClass vowels x -> Text.pack $ "h" ++ (x : xs)
-    otherwise -> a
+normalize :: String -> String
+normalize (x:xs)    | x `elem` vowels = 'h':x:xs
+normalize otherwise = otherwise
 
--- | Splits the words to end with vowels or to the end of the input.
-parseSyllable :: Parser Text.Text
-parseSyllable = do
-  consonants <- takeWhile (not . inClass vowels)
-  vowels <- takeWhile (inClass vowels)
-  return $ Text.append consonants vowels
+ruleYoja :: String -> String
+ruleYoja (f:s:r) =
+  case Map.lookup [f, s] pairsOfConsonants of
+    Nothing ->
+      case Map.lookup [f] pairsOfConsonants of
+        Nothing  -> f : s : ruleYoja r
+        Just syl -> syl ++ ruleYoja (s : r)
+    Just syl -> syl ++ ruleYoja r
+ruleYoja (f:r) =
+  case Map.lookup [f] pairsOfConsonants of
+    Nothing  -> f : r
+    Just syl -> syl ++ r
+ruleYoja [] = ""
 
-parseWord :: Parser Text.Text
-parseWord = do
-  parsed <- manyTill parseSyllable endOfInput
-  return $ Text.intercalate " " parsed
+toSyllables :: String -> [String]
+toSyllables []        = []
+toSyllables ( f:[] )  = []
+toSyllables (f:s:r)   | s`elem` vowels = [f,s] : toSyllables r
+toSyllables (f:s:t:r) | t `elem` vowels = [f,s,t] : toSyllables r
+toSyllables input     = [input]
+
+toWalikanYoja :: String -> [Char]
+toWalikanYoja =
+  concat .
+  map ruleYoja . intercalate [" "] . map (toSyllables . normalize) . words
+
+toYoja :: String -> String
+toYoja input =
+  let syllabledInput = map (toSyllables . normalize)
+      flattenedInput = intercalate [" "]
+      yojanizedSyllables = map ruleYoja
+  in concat
+       (yojanizedSyllables . flattenedInput . syllabledInput . words $ input)
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
