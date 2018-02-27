@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lib where
 
+import           Data.Char
 import           Data.List
 import qualified Data.Map.Strict as Map
 import           Data.Maybe      (fromJust)
 import           Data.String
-import           Data.Char
 
 -- | First part of javanese script.
 -- https://en.wikipedia.org/wiki/Hanacaraka
@@ -37,7 +37,7 @@ ruleYoja (f:s:r) =
   case Map.lookup [toLower f, toLower s] pairsOfConsonants of
     Nothing ->
       case Map.lookup [toLower f] pairsOfConsonants of
-        Nothing -> f : s : ruleYoja r
+        Nothing  -> f : s : ruleYoja r
         Just syl -> syl ++ ruleYoja (s : r)
     Just syl -> syl ++ ruleYoja r
 ruleYoja (f:r) =
@@ -56,7 +56,8 @@ toSyllables input     = [input]
 
 -- | Converts sentences to a Jogjakarta styled Walikan to Bahasa, vice versa.
 convertJogja :: String -> String
-convertJogja input = concat . yojanizedSyllables . flattenedInput . syllabledInput . words $ input
+convertJogja input =
+  concat . yojanizedSyllables . flattenedInput . syllabledInput . words . map toLower $ input
   where
     syllabledInput :: [String] -> [[String]]
     syllabledInput = map (toSyllables . normalize)
@@ -73,4 +74,4 @@ ruleMalang otherwise = otherwise
 
 -- | Converts sentences to a Malang styled Walikan to bahasa, vice versa.
 convertMalang :: String -> String
-convertMalang input = unwords . map ruleMalang $ words input
+convertMalang input = unwords . map ruleMalang . words . map toLower $ input
